@@ -1,0 +1,52 @@
+IDEA DE LO QUE ME PIDEN
+
+
+	-Los sensores 1 y 2 entregan  un código digital de 4 bits que van del 0-15.
+ Este valor corresponderá respectivamente con -10ºC y 35ºC
+
+	-Con dos pulsadores seleccionamos el modo de funcionamiento. Hay dos modos posibles: 
+		El modo "normal" Simplemente mide y visualiza la temperatura cada 7 segundos.
+
+		El modo "Programación" Permite introducir un valor usando el pulsador "+" o "-" para aumentar o disminuir la temop
+	-Para visualizar la temperatura se utilizarán 2 displays destinando 7 bits en total a su funcionamiento. Esto es así porque cada "segmento" del display se representa con un bit deferente.
+ Con esto podremos visualizar el valor de la temperatura en el modo en que estemos.
+
+
+	-De todo el sistemas saldrán 2 señales digitales "Calentado" y "enfriado" para controlar si el sistema está enfriando o calentando en función de la temperatura del recinto. Para poder ver
+ cual del los dos está activo conecto dos leds a modo de comprobación visual.
+
+La temperatura es la media de los dos sensores, pero hay que tener en cuenta que si la diferencia es mayor de 3 grados, se producirá una alárma mostrando AL en los dos displays.
+
+Este sistema está condicionado para que entre las 22:00 y las 8:00 se mantenga a 12ºC automáticamente.
+
+IDEA DE COMO COMPRUEBO EL FUNCIONAMIENTO
+
+
+Para comprobar que todo funciona, al principio deberá observarse dos 0 en lso displays. A continuación, se someterán las siguientes pruebas:
+
+	-Descargamos el programa y reseteamos el sistema.
+
+	-Se tomarán várias temperaturas diferentes modificando los 4 bits de entrada comprobando la siguiente tabla de valores previstos
+
+		IMPORTANTE: Hay que usar el intervalo (-9,35) en vez de -15.
+
+		1111--35
+ºc   
+		1100--23
+ºc
+		0000-- -15ºc
+
+	-Se cambiará el modo a "programación" para confirmar que podemos mostrar un valor programable con la manipulacióp de "+" y "-"  [Interrupción que dentro de su rutina modifique el valor con las entradas de los botones]
+                                                                                                                                        [Si "+" se ha pulsado, temperatura++;.]  Duda sobre que pasa si lo mantengo.
+
+	-Se tomará un valor de temperatura que genere un error "Difernecia > 3" para comprobar que salta la interrupción  y se obtiene AL en los display [interrupción en función al resultado de una resta.]
+
+	-Se modificará el reloj (mediante código) para confirmar que entre las 22:00 y las 8:00 NO puedo modificar nada ni tan siquiera cambiar de modo [Interrupción del systick en cuya rutina desactivo las demás hasta salir de rango]
+
+
+	-Todo lo anterior se ha comprobado usando los diodos leds para ir confirmando las salidas de "Calentado" y "enfriado"
+
+
+
+
+0x3A98

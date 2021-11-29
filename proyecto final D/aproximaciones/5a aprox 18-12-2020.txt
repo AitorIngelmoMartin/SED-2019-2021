@@ -1,0 +1,180 @@
+//controlador de interrupciones
+#include <LPC17xx.H>
+#include <string.h>
+#include <stdio.h>
+
+#define DATAPORT 0x000000ff //P0.00 to P0.07 : Data lines connected to drive Seven Segments
+
+//char a=1, b=1, c=1;
+
+       char interrupcion_0 =0;
+       char interrupcion_1 =0;
+			 
+			 //Sensores
+			 int16_t temperaturaSensor1=0;
+			 int16_t temperaturaSensor2=0;
+			 
+			 //Displays
+			 unsigned int Disp1[16];
+			 unsigned int Disp2[16];
+			 
+			 //Temperatura media medida
+			 int16_t temperaturaMediaMedida =0;
+			 
+			 //Variables para el modo programador
+			 int16_t temperaturaProgramada=0;
+			 int16_t mododeprograma=0;
+
+
+//Función que inicializa las interrupciones
+void inicioPINSEL(){
+
+//Configuración de los pines P2.10 a P2.12, como entradas de interrupción
+ LPC_PINCON->PINSEL4 |= 1 << (10*2);   //ISP para el modo de programación
+ LPC_PINCON->PINSEL4 |= 1 << (11*2);   //KEY1 para el "-"
+ LPC_PINCON->PINSEL4 |= 1 << (12*2);   //KEY2 para el "+"
+ 
+ 
+ 
+	
+	LPC_GPIO0->FIODIR = 0xFFFFD000; /*P0.0-P0.13 como ENTRADA | sensor 1(0 a 4) y 2(5 a 8)*/
+	
+	LPC_GPIO2->FIODIR &= ~(1<<10); /* ISP definido como entrada */
+	LPC_GPIO2->FIODIR &= ~(1<<11); /* Key_1 definido como entrada */
+	LPC_GPIO2->FIODIR &= ~(1<<12); /* Key_2 definido como entrada */
+	
+  //Configurar P1.00-P1.09 como salidas, del P1.00-P1.06 para los DISPLAYS y 0.7 y 0.8 para A0 y A1
+	  LPC_GPIO1->FIODIR = 0x000000FF;
+		 
+	
+	 //******** RESISTENCIAS PULL-UP	
+	
+		LPC_PINCON->PINSEL3 &=~0xFC00;// Pines 21-24 GPIO (1111 1100 0000 0000)
+	
+	  LPC_PINCON->PINMODE3 &=~ 0xFC00;  //(1111 1100 0000 0000)
+
+	  LPC_GPIO1->FIODIR &=~0xE00000;    //1110 0000 0000 0000 0000 Puestos como pull-up
+		
+	 // siempre que x sea 0 a 15, en este caso sería  x=5 , 7,   9 . 
+   LPC_PINCON->PINSEL0 &= ~(0x3 << 9); // Función GPIO
+   LPC_PINCON->PINMODE0 &= ~(0x3 << 9); // Resistencia pull-up
+   LPC_GPIO0->FIODIR &= ~(0x1 << 9); // bit P0.9 definido como entrada
+	 //********
+}
+
+void configuracionDeInterrupciones(){
+	
+  //Asignación de prioridades
+  NVIC_SetPriorityGrouping(5);
+	
+	NVIC_SetPriority(TIMER0_IRQn, 0x00);//Timer0
+	
+  NVIC_SetPriority(EINT0_IRQn, 0x04);//BOTONES
+  NVIC_SetPriority(EINT1_IRQn, 0x06);
+  NVIC_SetPriority(EINT2_IRQn, 0x02);
+
+//Habilitación de las interrupciones
+	NVIC_EnableIRQ(TIMER0_IRQn);
+  NVIC_EnableIRQ(EINT0_IRQn);
+  NVIC_EnableIRQ(EINT1_IRQn);
+  NVIC_EnableIRQ(EINT2_IRQn);
+}
+
+
+//ISR de las interrupciones
+
+void TIMER0_IRQHandler(void){
+	LPC_TIM0->IR |= (1<<0);	//Borro el flag del Match0
+
+	
+}
+void EINT0_IRQHandler(){ //Rutina de modo programador. Entro si pulso el ISP 
+		
+   	LPC_SC->EXTINT |= (1);   // Borrar el flag de la EINT0 --> EXTINT.0
+		
+	  if(mododeprograma==1){
+			mododeprograma=0;
+		}
+	 
+		mododeprograma=1;  
+				
+}
+//Rutina KEY1
+void EINT1_IRQHandler()//Rutina para aumentar la temperatura
+{
+	LPC_SC->EXTINT |= (1 << 1);   // Borrar el flag de la EINT1 --> EXTINT.1	7
+	   
+	    temperaturaProgramada++;
+			//printf("Interrupciones 1: %d\n",interrupcion_1);
+	}
+
+//Rutina KEY2
+void EINT2_IRQHandler(){//Rutina para disminuir la temperatura
+	
+			LPC_SC->EXTINT |= (1 << 2);   // Borrar el flag de la EINT2 --> EXTINT.2	
+	    temperaturaProgramada--;	
+				//LPC_GPIO0->FIOSET = 0x00000100;     // Activo el P0.08
+				//while((LPC_GPIO0->FIOPIN & (1<<9)) != 0);
+				//LPC_GPIO0->FIOCLR = 0x00000100;     // Desactivo el P0.08
+			
+}
+//FUNCIÓN para verificar si hay errores en loas sensores
+int32_t falloEnMedidas(int8_t valorMedido1, int8_t valorMedido2){
+	
+	int16_t media=0;
+	
+	media = (valorMedido1+valorMedido2)/2;
+	
+	if((media>valorMedido1+3)|(media>valorMedido2+3)){
+	
+	//mostrar AL
+	}else{
+		
+	return(media);
+	}
+	
+}
+void representarTemperatura(int8_t valorMedido){
+
+		int16_t unidades=0;
+		int16_t decenas= 0;
+
+		if((valorMedido<0)){//Si tengo un valor negativo
+		
+			//display 1
+				//mostrar --
+		
+		}
+		//Representar el número
+		
+			
+	
+}
+
+//Programa principal
+int main (void)
+{
+  inicioPINSEL();
+  configuracionDeInterrupciones();
+
+	
+	if(mododeprograma ==0){//Modo normal
+		
+		//Leo los sensores 1 y 2
+	  temperaturaSensor1=LPC_GPIO0->FIOPIN &= 0x00F; // Leo los P0.00-04 [SENSOR 1]
+		temperaturaSensor2=LPC_GPIO0->FIOPIN &= 0x0F0; // Leo los P0.05-08 [SENSOR 2]
+		
+		//Compruebo si hay error de medición
+		//int32_t mediaTrasFallo =	falloEnMedidas(temperaturaSensor1,temperaturaSensor2);
+		
+		//Establezco la temperatura
+				
+	}else{//Este fragmento se ejecuta cuando Estoy en modo programador
+	
+		
+	}
+	
+  while(1){						
+  }	
+		
+ }//FIN MAIN

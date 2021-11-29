@@ -1,0 +1,315 @@
+#include <LPC17xx.H>
+#include <string.h>
+#include <stdio.h>
+/*
+	int8_t prueba= 8;
+	int8_t auxPrueba =0;
+*/
+#define true 1
+#define false 0
+	
+#define negativo = 0x20;
+#define A =  0xDD;
+#define L =  0xA1;
+			 /*	
+       char interrupcion_0 =0;
+       char interrupcion_1 =0;			 
+			 */
+			 
+       //Temperatura media medida
+			 int16_t temperaturaMediaMedida =0;
+			 _Bool errorEnMedia=false;
+			 _Bool temperaturaNegativa = false; 
+			 _Bool temperaturaProgramadaNegativa = false;
+			 
+			 //Variables para el modo programador
+			 int16_t temperaturaProgramada= 22;
+			 int16_t mododeprograma=0;
+			 int16_t temperaturaPredefinida = 12;
+			 
+			 //Variables Timer
+			 int16_t hora =1;
+			  // 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+			 //  NO SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI SI
+			//   ASOCIAR A "hora" UNOS PINES PARA PODER CAMBIAR SU VALOR Y HACER PRUEBAS
+			_Bool horaFija=false;
+			 
+			 //Sensores
+			 int16_t temperaturaSensor1=0;
+			 int16_t temperaturaSensor2=0;
+			 
+			//Displays
+			 
+			uint16_t Disp1[10] ={0xAF,  
+				 									0x06,
+													0xAD ,
+													0x2F ,
+													0x66 ,
+													0x6D ,
+													0xDB ,
+													0x0D ,
+													0xDF ,
+													0x6D};
+            
+				              //  a b c d e f g P
+			uint16_t Disp2[10] ={0xAF,  
+				 									0x06,
+													0xAD ,
+													0x2F ,
+													0x66 ,
+													0x6D ,
+													0xDB ,
+													0x0D ,
+													0xDF ,
+													0x6D};		
+
+
+void inicioPINSEL(){
+
+//Configuracion de los pines P2.10 a P2.12, como entradas de interrupcion
+ LPC_PINCON->PINSEL4 |= 1 << (10*2);   //ISP para el modo de programacion
+ LPC_PINCON->PINSEL4 |= 1 << (11*2);   //KEY1 para el "-"
+ LPC_PINCON->PINSEL4 |= 1 << (12*2);   //KEY2 para el "+"
+	
+ LPC_GPIO0->FIODIR = 0xFFFFFF00; //P0.0-P0.13 como ENTRADA | sensor 1(0 a 3) y 2(4 a 7)
+	
+ LPC_GPIO2->FIODIR &= ~(1<<10); /* ISP definido como entrada */
+ LPC_GPIO2->FIODIR &= ~(1<<11); /* Key_1 definido como entrada */
+ LPC_GPIO2->FIODIR &= ~(1<<12); /* Key_2 definido como entrada */
+	
+//P1.00-P1.13 como salidas || P1.00-P1.06 para DISPLAY1 || P1.07 y P1.13 para DISPLAY2   *****A0 y A1*****
+ LPC_GPIO1->FIODIR = 0xFFFF0000;
+	
+//Configuracion timer	
+ LPC_SC->PCLKSEL0 |= 1 << 2; // Clock para el Timer0 = CCLK
+ LPC_TIM1->TCR |= 1 << 0;    // Arrancar el Timer (Tabla 427, pÃ¡gina 494) 
+}
+
+void configuracionDeInterrupciones(){
+	
+//Asignacion de prioridades
+  NVIC_SetPriorityGrouping(4);	
+	NVIC_SetPriority(TIMER0_IRQn, 0x2);//Timer0
+	NVIC_SetPriority(EINT0_IRQn, 0x4);//BOTONES
+  NVIC_SetPriority(EINT1_IRQn, 0x6);
+  NVIC_SetPriority(EINT2_IRQn, 0x8);
+
+//Habilitacion de las interrupciones
+	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(EINT0_IRQn);
+  NVIC_EnableIRQ(EINT1_IRQn);
+  NVIC_EnableIRQ(EINT2_IRQn);
+}
+
+void Configuracion_Systick(void)
+{
+SysTick->LOAD  = 999999 ;                        /* set reload register */
+NVIC_SetPriority (SysTick_IRQn, 0x0);              /* set Priority for Systick Interrupt */
+SysTick->VAL   = 0;                                /* Load the SysTick Counter Value */
+SysTick->CTRL  = 7;                               /* Enable SysTick IRQ and SysTick Timer */
+} 
+//Funcion que inicializa las interrupciones
+
+
+//ISR de las interrupciones
+void TIMER0_IRQHandler(void){
+	LPC_TIM0->IR |= (1<<0);	//Borro el flag del Match0	
+	hora++;
+	if(hora>24){
+		 hora=0;
+	}
+	
+	if((hora>22) && (hora<8)){//Si estoy entre la 22:00 y las 8:00
+		horaFija = true;
+	}
+}
+
+void EINT0_IRQHandler(){ //Rutina para el modo del programa. Entro si pulso el ISP 
+		
+   	LPC_SC->EXTINT |= (1);   // Borrar el flag de la EINT0 --> EXTINT.0
+		
+	  if(mododeprograma==1){
+				mododeprograma=0;
+		}else{
+				mododeprograma=1;  
+		}			
+}
+
+//Rutina KEY1
+void EINT1_IRQHandler(){//Rutina para aumentar la temperatura
+
+	LPC_SC->EXTINT |= (1 << 1);   // Borrar el flag de la EINT1 --> EXTINT.1	
+	temperaturaProgramada++;   
+	
+	if( (temperaturaMediaMedida>35)){//Sistema para no salirme del rango
+		  temperaturaProgramada--;
+	}
+}
+
+//Rutina KEY2
+void EINT2_IRQHandler(){//Rutina para disminuir la temperatura
+	
+			LPC_SC->EXTINT |= (1 << 2);   // Borrar el flag de la EINT2 --> EXTINT.2	
+	    temperaturaProgramada--;
+			
+			if(temperaturaProgramada<0){
+				temperaturaProgramadaNegativa=true;			
+			}
+			
+			if( temperaturaProgramada< (-15) ) {//Sistema para no salirme del rango
+					temperaturaProgramada++;
+			}								
+}
+void leerSensores(void){
+				//Leo los sensores 1 y 2
+				temperaturaSensor1=LPC_GPIO0->FIOPIN0 ; // Leo los P0.00-04 [SENSOR 1]
+				temperaturaSensor2=LPC_GPIO0->FIOPIN0 ; // Leo los P0.05-08 [SENSOR 2]
+}
+//FUNCION para verificar si hay errores en los sensores
+void falloEnMedidas(int8_t valorMedido1, int8_t valorMedido2){
+	
+		  int16_t media=0;
+		
+     	if(valorMedido1<0){//SOLUCIONAR SI ES NEGATIVO
+					valorMedido1*= (-1);
+					temperaturaNegativa = true;
+			}
+			
+			if(valorMedido2<0){
+					valorMedido2*= (-1);
+					temperaturaNegativa = true;
+			}
+			
+			media = (valorMedido1+valorMedido2)/2;
+	
+			if((valorMedido1 - valorMedido2)>3){
+						errorEnMedia= true;
+						//mostrar AL		
+			}
+			errorEnMedia = false;		
+			temperaturaMediaMedida = media;
+}
+
+void representarTemperatura(int16_t valorMedido){//Visualizar temperatura en los displays
+			int16_t unidades=5;
+			int16_t decenas= 5; 
+			uint16_t aux=0;
+	if(horaFija == true){
+		//Temperatura a 12ºC
+		//LPC_GPIO4->FIOSET0 |= (valorDelPin<<aux); //Temperatura a 12ºC
+	}
+
+	if(mododeprograma==0){// SI: modo "Normal"
+		
+			if(temperaturaNegativa==false){//Si el valor medido es positivo
+										if((valorMedido - 10)>=0){ //Compruebo si tiene decenas
+												decenas  = (valorMedido/10);
+												unidades =(valorMedido-(decenas*10));
+										}else{//Si no tiene decenas			
+												decenas=0;	
+												unidades=valorMedido;
+										}
+										
+					//Represento los valores
+					for (aux =0 ; aux<8 ; aux++){//Represento decenas
+								int8_t valorDelPin = Disp2[decenas];
+								LPC_GPIO1->FIOSET2 |= ((valorDelPin+4)<<aux);//Saco los valores por el pin
+								aux++;	
+					}		
+				
+					for (aux =0 ; aux<8 ; aux++){//Represento unidades
+								int16_t valorDelPin = Disp2[unidades] ;	//display1
+								LPC_GPIO1->FIOSET2 |= (valorDelPin<<aux);//Saco los valores por el pin
+								aux++;	
+					}							
+							
+		}else{//Si el valor medido es negativo
+				//Represento el display 1
+				for (aux =0 ; aux<8 ; aux++){
+						int16_t valorDelPin = Disp2[unidades] ;	//display1					
+						LPC_GPIO1->FIOSET2 |= (valorDelPin<<aux);
+						aux++;	
+				}
+/*
+				//mostrar - en display 2
+				for (aux =0 ; aux<8 ; aux++){
+				//		int16_t valorDelPin = negativo ;	
+				//		LPC_GPIO4->FIOSET0 |= (valorDelPin<<aux);//Saco los valores por el pin
+						aux++;	
+				}
+*/
+			}
+			
+	}else{//En modo programacion---------------------------------------------------------
+			aux=0;
+					if(temperaturaProgramadaNegativa==false){//Si el valor programado es positivo
+									if((temperaturaProgramada - 10)>=0){ //Compruebo si tiene decenas
+											decenas  = (temperaturaProgramada/10);
+											unidades =(temperaturaProgramada-(decenas*10));
+									}else{//Si no tiene decenas			
+											decenas=0;	
+											unidades=temperaturaProgramada;
+									}
+													//Represento los valores
+				for (aux =0 ; aux<8 ; aux++){//Represento decenas
+							int8_t valorDelPin = Disp2[decenas];
+							LPC_GPIO1->FIOSET2 |= ((valorDelPin+4)<<aux);//Saco los valores por el pin
+							aux++;	
+				}		
+		
+				for (aux =0 ; aux<8 ; aux++){//Represento unidades
+							int16_t valorDelPin = Disp1[unidades] ;	
+							LPC_GPIO1->FIOSET2 |= (valorDelPin<<aux);//Saco los valores por el pin
+							aux++;	
+				}
+									
+					}else{//Si el valor programado es negativo
+								//display 1
+								//mostrar - en display 1 y el nº en el display 2
+					}
+								
+	 }
+				
+}
+
+
+//Inicio main
+int main (void)
+{
+	inicioPINSEL();
+  configuracionDeInterrupciones();
+	Configuracion_Systick();
+/*
+					for (auxPrueba =0 ; auxPrueba<8 ; auxPrueba++){//Represento decenas
+							int8_t valorDelPin = Disp2[prueba];
+							LPC_GPIO1->FIOSET1 |= (valorDelPin<<auxPrueba);//Saco los valores por el pin
+							auxPrueba++;	
+					}	
+*/
+  while(1){						
+  }	
+		
+ }//FIN main
+
+
+void SysTick_Handler (void){ // ISR del SYSTICK-
+		int16_t mediaTrasFallo;	
+
+		if(mododeprograma == 0){//Modo "normal"
+			  //Leo los sensores
+			  leerSensores();
+			
+				//Compruebo si ha habido un error de medicion
+				falloEnMedidas(temperaturaSensor1,temperaturaSensor2);		
+			
+			if(errorEnMedia==false){//Si no hay error				
+						//Establezco la temperatura
+						representarTemperatura(temperaturaMediaMedida);
+			}
+		
+		}else{//Esto se ejecuta cuando Estoy en modo "programador"			
+				representarTemperatura(temperaturaMediaMedida);
+		
+		}
+}//FIN Systick
+

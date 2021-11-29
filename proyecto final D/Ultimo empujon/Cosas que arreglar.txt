@@ -1,0 +1,5 @@
+Tengo que arreglar los Systick/timer
+
+
+Hacer globales media/temperatudaObtenida ¿?
+

@@ -1,0 +1,10 @@
+
+			if((valorMedido1 - valorMedido2)>=3 || (valorMedido2-valorMedido1)>=3){
+						errorEnMedia= true;							
+			}else{
+					errorEnMedia = false;	
+			}
+
+
+PARA PONER NINGUNA RESISTENCIA ASOCIADA AL LA SALIDA CÓMO SE HACÍA.
+ 	
