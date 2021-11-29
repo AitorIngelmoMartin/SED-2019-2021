@@ -1,0 +1,156 @@
+void inicioIRQs()
+{
+NVIC_SetPriorityGrouping(5);
+
+}
+
+
+
+
+
+
+
+
+
+
+//controlador de interrupciones
+
+
+#include <LPC17xx.H>
+
+char a=1, b=1, c=1;
+
+
+//Función que inicializa las interrupciones
+void inicioPINSEL()
+{
+
+//Configuración de los pines P2.10 a P2.12, como entradas de interrupción
+ LPC_PINCON->PINSEL4 |= 1 << (10*2);   
+ LPC_PINCON->PINSEL4 |= 1 << (11*2);   
+ LPC_PINCON->PINSEL4 |= 1 << (12*2);   
+ 
+	
+	//-----------------------------------------------------------------------
+//Configurar P0.04/06/08 como salidas
+	  LPC_GPIO0->FIODIR |= (0x1<<4); // P0.04 definido como salida 
+		LPC_GPIO0->FIODIR |= (0x1<<6); // P0.06 definido como salida 
+		LPC_GPIO0->FIODIR |= (0x1<<8); // P0.08 definido como salida 
+	
+	  //******** RESISTENCIAS PULL-UP
+	
+	// siempre que x sea 0 a 15, en este caso sería  x=5 , 7,   9 . 
+LPC_PINCON->PINSEL0 &= ~(0x3 << 5); // Función GPIO
+LPC_PINCON->PINMODE0 &= ~(0x3 << 5); // Resistencia pull-up
+LPC_GPIO0->FIODIR &= ~(0x1 << 5); // bit P0.5 definido como entrada
+	
+LPC_PINCON->PINSEL0 &= ~(0x3 << 7); // Función GPIO
+LPC_PINCON->PINMODE0 &= ~(0x3 << 7); // Resistencia pull-up
+LPC_GPIO0->FIODIR &= ~(0x1 << 7); // bit P0.7 definido como entrada
+
+LPC_PINCON->PINSEL0 &= ~(0x3 << 9); // Función GPIO
+LPC_PINCON->PINMODE0 &= ~(0x3 << 9); // Resistencia pull-up
+LPC_GPIO0->FIODIR &= ~(0x1 << 9); // bit P0.9 definido como entrada
+	  //********
+		
+		
+	//-----------------------------------------------------------------------------------
+}
+
+void inicioIRQs()
+{
+//Asignación de prioridades
+  NVIC_SetPriorityGrouping(4);
+  NVIC_SetPriority(EINT0_IRQn, 0x4);
+  NVIC_SetPriority(EINT1_IRQn, 0x6);
+  NVIC_SetPriority(EINT2_IRQn, 0x2);
+
+//Habilitación de las interrupciones
+  NVIC_EnableIRQ(EINT0_IRQn);
+  NVIC_EnableIRQ(EINT1_IRQn);
+  NVIC_EnableIRQ(EINT2_IRQn);
+}
+
+//ISR de las interrupciones
+void EINT0_IRQHandler()
+{ 
+			do{
+	
+				LPC_SC->EXTINT |= (1);   // Borrar el flag de la EINT0 --> EXTINT.0
+				LPC_GPIO0->FIOSET = 0x0000010;     // Activo el P0.04
+				while(a) ;	
+				LPC_GPIO0->FIOCLR = 0xFFFFFFFF;     // Desactivo el P0.04
+	
+			}while((LPC_GPIO0->FIOPIN & 0xFFFFFFFF)!=0xFFFFFFDF);
+}
+
+void EINT1_IRQHandler()
+{
+	
+			do{
+				LPC_SC->EXTINT |= (1 << 1);   // Borrar el flag de la EINT1 --> EXTINT.1	
+				LPC_GPIO0->FIOSET = 0x0000040;     // Activo el P0.06
+				while(b);
+				LPC_GPIO0->FIOCLR = 0xFFFFFFFF;     // Desactivo el P0.06
+			}while((LPC_GPIO0->FIOPIN & 0xFFFFFFFF)!=0xFFFFFEFF);
+	}
+
+void EINT2_IRQHandler()
+{
+			do{
+				LPC_SC->EXTINT |= (1 << 2);   // Borrar el flag de la EINT2 --> EXTINT.2	
+				LPC_GPIO0->FIOSET = 0x0000100;     // Activo el P0.08
+				while(c);
+				LPC_GPIO0->FIOCLR = 0xFFFFFFFF;     // Desactivo el P0.08
+			}while((LPC_GPIO0->FIOPIN & 0xFFFFFFFF)!=0xFFFFFDFF);
+}
+
+//Programa principal
+int main (void)
+{
+  inicioPINSEL();
+
+  inicioIRQs();
+
+  while(1){
+		
+		int boton =5; //Igualo a 5 para que no haga nada si no pulso algo
+		if ((LPC_GPIO2->FIOPIN & (1<<10)) == 0){ //Si pulso ISP
+			
+			boton=0;			
+		}
+		
+		if ((LPC_GPIO2->FIOPIN & (1<<11)) == 0){ //Si pulso KEY 1
+			
+			
+			boton=1;
+				
+		}
+		
+		if ((LPC_GPIO2->FIOPIN & (1<<12)) == 0){ //Si pulso KEY 2			
+			
+			boton =2;				
+		}
+		switch(boton){
+		
+			case 0x0:		
+				EINT0_IRQHandler();
+			
+				break;
+			case 0x01:
+				EINT1_IRQHandler();
+			
+				break;
+			
+			case 0x02:	
+				EINT2_IRQHandler();
+			
+				break;
+	
+		
+		}
+			
+			
+		
+ }
+}

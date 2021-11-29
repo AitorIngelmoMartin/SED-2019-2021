@@ -1,0 +1,17 @@
+Los registros PINSEL y PINMODE están definidos en la estructura 
+LPC_PINCON. 
+
+A continuación te indico cómo sería la configuración de los P0.0 y P0.1 como GPIO, con pull-up y direccion de entrada:
+
+// Puerto 0
+LPC_PINCON->PINSEL0 &= ~0xF; // Función GPIO
+LPC_PINCON->PINMODE0 &= ~0xF; // Resistencia pull-up
+LPC_GPIO0->FIODIR &= ~(0x3); // P0.1 y P0.0 definidos como entrada
+
+Configura de forma similar los bits de los P0.x que deseas así:
+
+// siempre que x sea 0 a 15, en este caso sería  x=5 , 7,   9 . ...
+LPC_PINCON->PINSEL0 &= ~(0x3 << x); // Función GPIO
+LPC_PINCON->PINMODE0 &= ~(0x3 << x); // Resistencia pull-up
+LPC_GPIO0->FIODIR &= ~(0x1 << x); // bit P0.x definido como entrada
+

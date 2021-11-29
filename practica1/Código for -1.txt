@@ -1,0 +1,10 @@
+inicio	LDR r0,=Numeros
+		MOV r1,#20
+		MOV r2,#1
+
+
+
+   lazo	STR r2,[r0],#4
+		ADD r2,r2,#1
+		SUBS r1,r1,#1
+		BNE lazo

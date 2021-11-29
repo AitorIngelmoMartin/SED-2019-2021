@@ -1,0 +1,68 @@
+TEORIA TIMER
+
+Valor del reloj que ataca al preescaler:
+	Puedo tener valores del propio reloj(100MH) , 1/2, 1/4, 1/8..
+	Esto es en cada timer.
+
+Machine register por cada timer:
+	Hay 4 timer register por cada timer.
+
+Trabajo sólo con el timer 1,CON UN RELOJ ELEgido A 50MHZ , Tpclk =20ns
+	PREESCALER--->TC-->[4 comparadores]
+ 
+
+Si yo quiero tener en la placa con ún "buscan(bus de datos)" comunicando cada 111,2 ms y que cada día guarde la
+media de esos datos y lo envíe a internet.
+Como hay varios tiempos de distinto valor, empleamos TIMERX para cada elemento(TIMER0 para ms, TIMER1 para días.).
+En resumen, lo importante es tener un Timer para lo que cuente el contador(Si el contanor lo quiero en 1us, haré 1us/20ns=50)
+
+Cuando se alcanza un dato, o interrrumpo, o reseteo el valor de cuenta o STOP(deja de contar).
+
+
+
+Quiero un tick cada 20ns, preescaler = (50-1)
+
+30% 500us es 150us, pongo en MR0= 150-1
+		             MR1 = 500-1
+Se recomienda que los MR séan ascendentes MR0<MR1<MR....
+
+IRS   
+
+PR ES COMO EL LOAD
+MRX ES EL Nº
+MCRX ES PARA LA INTERRUPCIÓN , ME HA DIOCHO Q LO PONE A STOP(SE PARA, RESETEA E INTERRUMPE CUANDO HAYA MATCH)
+P/T CR retrasa timer, vuelve a poner a 0, arranca el timer
+
+
+
+
+
+
+
+
+monoestable:Cuando tengo una señal en un sistema de una sola accion en un sistema retardado, ??????
+
+
+
+
+
+----------
+LPC_GPIO3->FIODIR |= (1<<26); // P3.268 definido como salida
+  LPC_SC->PCLKSEL0 |= 1 << 5; // Clock para el Timer1 = CCLK/2
+	
+   LPC_TIM1->MR0 = 150-1; // Damos un valor apropiado para la frecuencia de
+                         // parpadeo del LED basándonos en la frecuencia del reloj.
+	 LPC_TIM1->MR0 = 500-1;
+	
+   LPC_TIM1->MCR |= ((0<<2) | (0<<1) | (1<<0)<<0); // CONFIGURO:Interrumpir cuando se alcance Match0 (bit0) y resetear el contador del Timer
+                           // cuando alcance el valor del Match0 (bit1) (Tabla 429, página 496)
+	 LPC_TIM1->MCR |= ((0<<2) | (0<<1) | (1<<0)<<0);
+	
+	
+  LPC_TIM1->PR = 50e-6 -1;	 // Cada vez que el Prescaler alcance este valor se incrementa en uno el contador del Timer
+	
+  LPC_TIM1->TCR |= 1 << 1; // Resetear Timer (Tabla 427, página 494)
+  LPC_TIM1->TCR &= ~(1<<1);     // Volvemos a poner a 0 para eliminar el Reset de la línea anterior
+  NVIC_EnableIRQ(TIMER1_IRQn); // Habilitar interrupción Timer
+  LPC_TIM1->TCR |= 1 << 0;    // Arrancar el Timer (Tabla 427, página 494)
+----------

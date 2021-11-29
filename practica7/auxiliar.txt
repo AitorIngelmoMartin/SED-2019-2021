@@ -1,0 +1,214 @@
+void DACInit (void){
+  // setup the p0.26 pin as DAC output 
+  // PINSEL1 bits 20 => 0 and bit 21 => 1
+  LPC_PINCON->PINSEL1 &= ~(0x1<<20);
+  LPC_PINCON->PINSEL1 |= (0x1<<21);	
+	return;
+}
+void InicializaArray (void){
+
+ return;
+}
+void configuraGPIO(void){
+   LPC_PINCON->PINSEL1 &=~(0X3<<21);
+   LPC_PINCON->PINMODE1 &=~(0X03<<21);
+   LPC_GPIO1->FIODIR1 &=~(0X3<<21);
+   return;
+}
+void configuraTimer0 (void){
+    //Preescaler para el clk
+	  LPC_SC->PCLKSEL0 |= 1 << 5; // Clock para el Timer1 = CCLK/2
+	
+		LPC_TIM0->MR0 = 50000000-1; //Interrupción cuadno alcance MR0
+	
+}
+void configuraInterrupciones(void){
+
+	  //Configuro prioridades
+    NVIC_SetPriorityGrouping(3);
+	  NVIC_SetPriority(EINT2_IRQn, 0X01);
+    NVIC_SetPriority(TIMER0_IRQn,0X02);
+
+	
+	//Acttivo las interrupciones
+  NVIC_EnableIRQ(EINT2_IRQn);
+  NVIC_EnableIRQ(TIMER1_IRQn);	
+}
+uint8_t LeerFrecuencia(void){
+	
+  int valor =LPC_GPIO1->FIOPIN1;
+ 
+   //Estructura que rellena el array formaDeOnda	
+	for(int i =0;i< NUM_MUESTRAS;i++){
+	
+	 formaDeOnda[i]= valor;
+	
+	}
+
+}
+
+/*********************************/
+#include "lpc17xx.h"
+#include "math.h"
+#define DAC_BIAS 0x00010000
+#define NUM_MUESTRAS 50
+#define PI 3.14159
+
+int formaDeOnda[50];
+uint16_t OndaSenoidal[NUM_MUESTRAS];
+uint8_t ContadorMuestras=0, FrecuenciaKhz;
+
+void DACInit (void){
+  // setup the p0.26 pin as DAC output 
+  // PINSEL1 bits 20 => 0 and bit 21 => 1
+  LPC_PINCON->PINSEL1 &= ~(0x1<<20);
+  LPC_PINCON->PINSEL1 |= (0x1<<21);	
+	return;
+}
+void InicializaArray (void){
+
+ return;
+}
+void configuraGPIO(void){
+    LPC_PINCON->PINSEL4 |= 1 << (10*2);   
+    LPC_PINCON->PINSEL4 |= 1 << (11*2);   
+    LPC_PINCON->PINSEL4 |= 1 << (12*2);  
+ 
+    
+    LPC_PINCON->PINSEL1 &=~(0X3<<21);
+    LPC_PINCON->PINMODE1 &=~(0X03<<21);
+    LPC_GPIO1->FIODIR1 &=~(0X3<<21);
+   
+    return;
+}
+void configuraTimer0 (void){
+  
+	
+}
+void configuraInterrupciones(void){
+
+	  //Configuro prioridades
+    NVIC_SetPriorityGrouping(3);
+	  NVIC_SetPriority(EINT2_IRQn, 0X01);
+    NVIC_SetPriority(TIMER0_IRQn,0X02);
+
+	
+	//Acttivo las interrupciones
+  NVIC_EnableIRQ(EINT2_IRQn);
+  NVIC_EnableIRQ(TIMER1_IRQn);	
+}
+uint8_t LeerFrecuencia(void){
+	
+  int valor =LPC_GPIO1->FIOPIN1;
+ 
+   //Estructura que rellena el array formaDeOnda	
+	for(int i =0;i< NUM_MUESTRAS;i++){
+	
+	 
+	}
+
+}
+
+int main (void)
+{
+		//LLamo a las funciones
+	  DACInit();
+    InicializaArray();
+		configuraGPIO();
+		FrecuenciaKhz=LeerFrecuencia();
+	  configuraTimer0();
+		configuraInterrupciones();
+	
+	while(1);
+
+
+}
+
+/******ME HA DICHO QUE HAGA LA QUE HA DADO ÉL******/
+#include "lpc17xx.h"
+#include "math.h"
+#define DAC_BIAS	0x00010000  // Settling time a valor 2,5us
+#define NUM_MUESTRAS 50
+#define PI 3.14159
+
+
+uint32_t i = 0, val_i;
+
+void DACInit( void )
+{
+  // setup the p0.26 pin as DAC output 
+  // PINSEL1 bits 20 => 0 and bit 21 => 1
+  LPC_PINCON->PINSEL1 &= ~(0x1<<20);
+  LPC_PINCON->PINSEL1 |= (0x1<<21); 
+}
+void configuraInterrupciones(void){
+
+	  //Configuro prioridades
+    NVIC_SetPriorityGrouping(3);
+	  NVIC_SetPriority(EINT2_IRQn, 0X01);
+    NVIC_SetPriority(TIMER0_IRQn,0X02);
+
+	
+	  //Acttivo las interrupciones
+    NVIC_EnableIRQ(EINT2_IRQn);
+    NVIC_EnableIRQ(TIMER0_IRQn);	
+}
+void EINT2_IRQHandler(){ 
+	
+				LPC_SC->EXTINT |= (1);   // Borrar el flag de la EINT0 --> EXTINT.0
+	
+	//INICIO rutina de interrupción
+	    
+	//FIN rutina de interrupción
+				
+				//printf("Interrupciones 0: %d\n",interrupcion_0);
+				//LPC_GPIO0->FIOCLR = 0x00000010;     // Desactivo el P0.04
+				
+}
+
+void Configura_SysTick( void )
+{
+	 NVIC_SetPriority  (SysTick_IRQn, 2);  /* set Priority for Systick Interrupt */
+	
+	 SysTick->LOAD  = 1e5 -1;       // Load the SysTick Counter Value   => 1e5 * 10 ns = 1 ms
+	 SysTick->VAL   = 0;         
+   SysTick->CTRL  = (1<<2) | (1<<1) | (1<<0);  // Enable SysTick IRQ and SysTick Timer
+
+	return;
+}
+void configuraGPIO(void){  
+    LPC_PINCON->PINSEL4 |= 1 << (12*2);   //KEY_2 Como interrupción
+ 
+    
+    LPC_PINCON->PINSEL1 &=~(0X3<<21);
+    LPC_PINCON->PINMODE1 &=~(0X03<<21);
+    LPC_GPIO1->FIODIR1 &=~(0X3<<21);
+   
+    return;
+}
+
+void SysTick_Handler (void)			// Rutina (ISR) de atención del SYSTICK
+{
+	
+	if ( i > NUM_MUESTRAS){  // i va de 0 a 249  => se comienza señal (ciclo) cada 250 * 1ms
+		i = 0;
+	}
+	else{	
+		i++;  
+	}
+	val_i = (i*1023)/NUM_MUESTRAS;  // se pasa i a los valores del DAC 0 a 1023, mejor hacer primero la multiplicación para no tener truncamiento
+	
+	LPC_DAC->DACR = (val_i << 6) | DAC_BIAS;		
+	
+	return;
+}
+
+int main (void)
+{
+	
+  DACInit();   // Inicializa P0.26 como DAC 
+  Configura_SysTick();  // configura SysTick para interrumpir cada 10 ms
+	configuraGPIO(); //LLama a la función que configura los Pines
+	
+  while (1);	
+}

@@ -1,0 +1,555 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;    Programa para el estudio de los modos de direcciona
+                       miento en ensamblador
+    2 00000000         
+    3 00000000 10002000 
+                       STACK_TOP
+                               EQU              0x10002000
+    4 00000000         
+    5 00000000                 AREA             RESET, CODE
+    6 00000000 10002000        DCD              STACK_TOP   ;puntero de pila in
+                                                            icial
+    7 00000004 00000000        DCD              inicio      ;Rutina de inicio p
+                                                            ara saltar a 12"ini
+                                                            cio"
+    8 00000008 00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00 00 
+              00 00            SPACE            (0x400-8)
+    9 00000400         
+   10 00000400                 ENTRY
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+   11 00000400         
+   12 00000400         inicio                               ;  Inicio del progr
+                                                            ama principal
+   13 00000400         
+   14 00000400         ; Se  inicializan algunos registros para que se pueda ob
+                       servar como se van modificando 
+   15 00000400         ; y los valores que toma la pila con la instrucción PUSH
+                       
+   16 00000400 F04F 30EE       LDR              R0,=0xEEEEEEEE
+   17 00000404 F04F 31DD       LDR              R1,=0xDDDDDDDD
+   18 00000408 F04F 32CC       LDR              R2,=0xCCCCCCCC
+   19 0000040C F04F 33BB       LDR              R3,=0xBBBBBBBB
+   20 00000410 F04F 34AA       LDR              R4,=0xAAAAAAAA
+   21 00000414 F04F 3599       LDR              R5,=0x99999999
+   22 00000418 F04F 3688       LDR              R6,=0x88888888
+   23 0000041C F04F 3777       LDR              R7,=0x77777777
+   24 00000420 F04F 3866       LDR              R8,=0x66666666
+   25 00000424         ; Fin de la inicialización 
+   26 00000424         ;                                   _
+   27 00000424 220A            MOVS             r2,#0x0A    ; 10               
+                                                                    | 
+   28 00000426 2108            MOVS             r1,#0x08    ; 8                
+                                                                   |
+   29 00000428 2005            MOVS             r0,#0x05    ; 5                
+                                                                   |
+   30 0000042A F000 F805       BL.W             Multiplica  ;llamada a subrruti
+                                                            na "41"        >  f
+                                                            unción main
+   31 0000042E 4905            LDR              r1,=dato    ;                  
+                                                                  |
+   32 00000430 6008            STR              r0,[r1,#0x00] ;                
+                                                                    |
+   33 00000432 E7FE    while   B                while       ; while(1);        
+                                                                           |
+   34 00000434         ;                                   -
+   35 00000434 4408    Suma    ADD              r0,r0,r1
+   36 00000436 4770            BX               lr          ;  return temp; 
+   37 00000438         
+   38 00000438         ;// función que calcula dato= c*(a+b)  
+   39 00000438         ;int Multiplica(int a, int b, int c) 
+   40 00000438         
+   41 00000438 B500    Multiplica
+                               PUSH             {lr}        ;como salto aquí en
+                                                             "30", empiezo a re
+                                                            gistrar en pila
+   42 0000043A F7FF FFFB       BL.W             Suma        ;    temp_suma = Su
+                                                            ma(a,b);    // Lama
+                                                             a la función Suma 
+                                                            , debo preservar LR
+                                                             guardandolo en pil
+                                                            a
+   43 0000043E FB00 F002       MUL              r0,r0,r2    ; temp= c*temp_suma
+                                                            ; 
+   44 00000442 BD00            POP              {pc}        ;return temp;   
+   45 00000444         
+   46 00000444 00000000        AREA             | Header Data|, DATA
+   47 00000000 00 00 00 
+              00       dato    SPACE            4
+   48 00000004         
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+   49 00000004                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\objects\pila_en_asm.d -o.\objects\pila_en_asm.o -I.\RTE\_LPC1768
+ -IC:\Users\Aitor\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include -I
+C:\Users\Aitor\AppData\Local\Arm\Packs\Keil\LPC1700_DFP\2.6.0\Device\Include --
+predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 532" --predefine=
+"_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1" --predefine="_RTE_ SETA 1" --lis
+t=.\listings\pila_en_asm.lst ..\CodigoDado\Pila_en_asm.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+Multiplica 00000438
+
+Symbol: Multiplica
+   Definitions
+      At line 41 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 30 in file ..\CodigoDado\Pila_en_asm.s
+Comment: Multiplica used once
+RESET 00000000
+
+Symbol: RESET
+   Definitions
+      At line 5 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      None
+Comment: RESET unused
+Suma 00000434
+
+Symbol: Suma
+   Definitions
+      At line 35 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 42 in file ..\CodigoDado\Pila_en_asm.s
+Comment: Suma used once
+inicio 00000400
+
+Symbol: inicio
+   Definitions
+      At line 12 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 7 in file ..\CodigoDado\Pila_en_asm.s
+Comment: inicio used once
+while 00000432
+
+Symbol: while
+   Definitions
+      At line 33 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 33 in file ..\CodigoDado\Pila_en_asm.s
+Comment: while used once
+5 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+ Header Data 00000000
+
+Symbol:  Header Data
+   Definitions
+      At line 46 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      None
+Comment:  Header Data unused
+dato 00000000
+
+Symbol: dato
+   Definitions
+      At line 47 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 31 in file ..\CodigoDado\Pila_en_asm.s
+Comment: dato used once
+2 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+STACK_TOP 10002000
+
+Symbol: STACK_TOP
+   Definitions
+      At line 3 in file ..\CodigoDado\Pila_en_asm.s
+   Uses
+      At line 6 in file ..\CodigoDado\Pila_en_asm.s
+Comment: STACK_TOP used once
+1 symbol
+344 symbols in table
